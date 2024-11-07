@@ -1,12 +1,13 @@
 # FreshRSS Youtube Video Tagger
 
-Automatically prefix youtube videos with [Shorts] \ [Upcoming] \ [Live] to make it easier to filter out different types of youtube videos. 
+Automatically prefix youtube videos with [Shorts] \ [Upcoming] to make it easier to filter out different types of youtube videos.
 
 ## Notes
 A Youtube Data v3 API token is required for this extension to work. Details on how to do so can be found here: https://developers.google.com/youtube/registering_an_application
 
 Shorts are detected by comparing the video duration to a configurable value. Any video added to the feed that is shorter that the `Shorts duration in seconds` config will be labelled as a short.
 
+Livestreams will be marked as unread when they transition from the "scheduled" state to the "live" state.
 This project is based off of the work done here! https://github.com/cn-tools/cntools_FreshRssExtensions/tree/master/xExtension-YouTubeChannel2RssFeed
 
 
