@@ -100,6 +100,10 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
                     "YouTubeVideoTagger-EntryBeforeInsert - Short detected, tagging short"
                 );
                 $entry->_title("[Shorts] " . $entry->title());
+                // Hash won't match with an identical new entry because of the title, so we check if it was updated and mark as read if it was
+                if ($entry->isUpdated()) {
+                    $entry->_isRead(true);
+                }
             }
 
             // Tag livestreams
@@ -113,12 +117,15 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
                         "YouTubeVideoTagger: Upcoming livestream detected, tagging upcoming"
                     );
                     $entry->_title("[Upcoming] " . $entry->title());
+                    // Hash won't match with an identical new entry because of the title, so we check if it was updated and mark as read if it was
+                    if ($entry->isUpdated()) {
+                        $entry->_isRead(true);
+                    }
                     break;
                 case "live":
                     Minz_Log::debug(
                         "YouTubeVideoTagger: Upcoming livestream detected, tagging live"
                     );
-                    $entry->_title("[Live] " . $entry->title());
                     break;
                 default:
                     Minz_Log::debug(
