@@ -18,4 +18,4 @@ Extensions must be in the ./extensions directory of your FreshRSS installation.
 
 ## Change log
 ### v0.0.1 (2024-11-06)
-- Initial fork from 
+- Initial project setup
