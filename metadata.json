@@ -1,0 +1,8 @@
+{
+	"name": "YouTubeVideoTagger",
+	"author": "Zhi Han Lim",
+	"description": "Prefix youtube videos with [Shorts] / [Upcoming] / [Live] tags appropriately",
+	"version": "0.0.1",
+	"entrypoint": "YouTubeVideoTagger",
+	"type": "user"
+}
