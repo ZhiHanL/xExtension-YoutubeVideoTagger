@@ -4,7 +4,7 @@ return array(
     'YouTubeVideoTagger' => array(
         'youtube_api_token' => array(
             'label' => 'Youtube API Token',
-            'hint' => 'Youtube Data V3 API Token. Follow the instructions here for details: https://developers.google.com/youtube/registering_an_application',
+            'hint' => 'Youtube Data V3 API Token',
         ),
         'shorts' => array(
             'duration' => array(

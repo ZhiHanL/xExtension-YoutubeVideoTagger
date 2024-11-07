@@ -10,6 +10,10 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
         $this->registerHook("entry_before_insert", [$this, "tagVideo"]);
     }
 
+    public function install() {
+        return true;
+    }
+
     public function handleConfigureAction()
     {
         $this->registerTranslates();
@@ -31,16 +35,32 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
         }
     }
 
+    private function configExists($key): bool {
+        if (FreshRSS_Context::$user_conf->YouTubeVideoTagger == null) {
+            return false;
+        }
+        return array_key_exists($key, FreshRSS_Context::$user_conf->YouTubeVideoTagger);
+    }
+
     public function getShortDuration(): int
     {
-        return intval(
-            FreshRSS_Context::$user_conf->YouTubeVideoTagger["short_duration"]
-        );
+        $configKey = 'short_duration';
+        if ($this->configExists($configKey)) {
+            return intval(
+                FreshRSS_Context::$user_conf->YouTubeVideoTagger[$configKey]
+            );
+        }
+        // Default to 60 config doesn't exist
+        return 60;
     }
 
     public function getYoutubeAPIToken(): string
     {
-        return FreshRSS_Context::$user_conf->YouTubeVideoTagger["youtube_api_token"];
+        $configKey = 'youtube_api_token';
+        if ($this->configExists($configKey)) {
+            return FreshRSS_Context::$user_conf->YouTubeVideoTagger[$configKey];
+        }
+        return "";
     }
 
     public function tagVideo($entry)
@@ -77,7 +97,7 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
                 $durationSeconds > 0
             ) {
                 Minz_Log::debug(
-                    "YouTubeVideoTagger-EntryBeforeInsert - Short Detected, tagging short"
+                    "YouTubeVideoTagger-EntryBeforeInsert - Short detected, tagging short"
                 );
                 $entry->_title("[Shorts] " . $entry->title());
             }
@@ -90,13 +110,13 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
             switch ($livestreamData) {
                 case "upcoming":
                     Minz_Log::debug(
-                        "YouTubeVideoTagger: Upcoming livestream deteceted, tagging upcoming"
+                        "YouTubeVideoTagger: Upcoming livestream detected, tagging upcoming"
                     );
                     $entry->_title("[Upcoming] " . $entry->title());
                     break;
                 case "live":
                     Minz_Log::debug(
-                        "YouTubeVideoTagger: Upcoming livestream deteceted, tagging live"
+                        "YouTubeVideoTagger: Upcoming livestream detected, tagging live"
                     );
                     $entry->_title("[Live] " . $entry->title());
                     break;
