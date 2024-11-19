@@ -65,6 +65,7 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
 
     public function tagVideo($entry)
     {
+        $entryDAO = FreshRSS_Factory::createEntryDao();
         try {
             // Check if entry is a youtube video
             if (
@@ -88,10 +89,14 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
             // Tag shorts
             //
             // Append [shorts] to title if the length < configured seconds and  length > 0 (scheduled streams)
-            $duration = new DateInterval(
-                $videoDetails->contentDetails->duration
-            );
-            $durationSeconds = self::intervalToSeconds($duration);
+            $durationSeconds = 0;
+            if (property_exists($videoDetails->contentDetails, "duration")) {
+                $duration = new DateInterval(
+                    $videoDetails->contentDetails->duration
+                );
+                $durationSeconds = self::intervalToSeconds($duration);
+            }
+
             if (
                 $durationSeconds < $this->getShortDuration() &&
                 $durationSeconds > 0
@@ -100,16 +105,15 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
                     "YouTubeVideoTagger-EntryBeforeInsert - Short detected, tagging short"
                 );
                 $entry->_title("[Shorts] " . $entry->title());
-                // Hash won't match with an identical new entry because of the title, so we check if it was updated and mark as read if it was
-                if ($entry->isUpdated()) {
-                    $entry->_isRead(true);
-                }
             }
 
             // Tag livestreams
             //
             // Append [Upcoming] to title if upcoming livestream
             // Append [Live] to title if live livestream
+            Minz_Log::debug(
+                "YouTubeVideoTagger: Short not detected, checking for upcoming and live"
+            );
             $livestreamData = $videoDetails->snippet->liveBroadcastContent;
             switch ($livestreamData) {
                 case "upcoming":
@@ -117,15 +121,12 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
                         "YouTubeVideoTagger: Upcoming livestream detected, tagging upcoming"
                     );
                     $entry->_title("[Upcoming] " . $entry->title());
-                    // Hash won't match with an identical new entry because of the title, so we check if it was updated and mark as read if it was
-                    if ($entry->isUpdated()) {
-                        $entry->_isRead(true);
-                    }
                     break;
                 case "live":
                     Minz_Log::debug(
                         "YouTubeVideoTagger: Upcoming livestream detected, tagging live"
                     );
+                    $entry->_title("[Live] " . $entry->title());
                     break;
                 default:
                     Minz_Log::debug(
@@ -138,6 +139,26 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
                 "YouTubeVideoTagger: Finalized Entry Name: " .
                     $entry->title()
             );
+
+            // Handle only marking updated video state entries as unread
+            // Get existing entry if it exists
+            $existingEntry = $entryDAO->searchByGuid($entry->feedId(), $entry->guid());
+            if ($existingEntry !== null) {
+                if (strcasecmp($existingEntry->hash(), $newEntry->hash()) !== 0) {
+                    // Hashed doesn't match means that the video state has changed
+                    Minz_Log::debug(
+                        "YouTubeVideoTagger: video hash changed, marking unread"
+                    );
+                    $entry->_isRead(false);
+                }
+                else
+                {
+                    Minz_Log::debug(
+                        "YouTubeVideoTagger: video hash unchanged, marking read"
+                    );
+                    $entry->_isRead(true);
+                }
+            }
         } catch (Exception $e) {
             Minz_Log::error(
                 "YouTubeVideoTagger: " . $e->getMessage()
