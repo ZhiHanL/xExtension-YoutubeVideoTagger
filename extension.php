@@ -144,17 +144,16 @@ class YouTubeVideoTaggerExtension extends Minz_Extension
             // Get existing entry if it exists
             $existingEntry = $entryDAO->searchByGuid($entry->feedId(), $entry->guid());
             if ($existingEntry !== null) {
-                if (strcasecmp($existingEntry->hash(), $entry->hash()) !== 0) {
-                    // Hashed doesn't match means that the video state has changed
+                if (strcasecmp($existingEntry->title(), $entry->title()) !== 0) {
                     Minz_Log::debug(
-                        "YouTubeVideoTagger: video hash changed, marking unread"
+                        "YouTubeVideoTagger: video title changed, marking unread"
                     );
                     $entry->_isRead(false);
                 }
                 else
                 {
                     Minz_Log::debug(
-                        "YouTubeVideoTagger: video hash unchanged, marking read"
+                        "YouTubeVideoTagger: video title unchanged, marking read"
                     );
                     $entry->_isRead(true);
                 }
